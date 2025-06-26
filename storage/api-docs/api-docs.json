@@ -1,0 +1,443 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Laravel Kafka Integration API Documentation",
+        "description": "API documentation for Laravel Kafka Integration project, including table ordering system",
+        "contact": {
+            "name": "API Support",
+            "email": "admin@example.com"
+        },
+        "license": {
+            "name": "MIT License",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "API Server"
+        },
+        {
+            "url": "http://localhost:9999"
+        }
+    ],
+    "paths": {
+        "/api/kafka/produce": {
+            "post": {
+                "tags": [
+                    "Kafka"
+                ],
+                "summary": "Send a message to a Kafka topic",
+                "description": "Sends a message to the specified Kafka topic with an optional key",
+                "operationId": "produceMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "topic",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "topic": {
+                                        "type": "string",
+                                        "example": "test-topic"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Hello Kafka from Laravel!"
+                                    },
+                                    "key": {
+                                        "type": "string",
+                                        "example": "test-key"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message sent to Kafka"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "topic": {
+                                                    "type": "string",
+                                                    "example": "test-topic"
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Hello Kafka from Laravel!"
+                                                },
+                                                "key": {
+                                                    "type": "string",
+                                                    "example": "test-key"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/api/kitchen/orders": {
+            "get": {
+                "tags": [
+                    "KitchenDisplay"
+                ],
+                "summary": "Get all kitchen orders",
+                "description": "Returns a list of all orders with their current status",
+                "operationId": "getOrders",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "orders": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "order_id": {
+                                                        "type": "string",
+                                                        "example": "ORD-ABCD1234"
+                                                    },
+                                                    "table_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "items": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Pizza Margherita"
+                                                                },
+                                                                "quantity": {
+                                                                    "type": "integer",
+                                                                    "example": 2
+                                                                },
+                                                                "price": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 10.99
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "received",
+                                                            "processing",
+                                                            "ready",
+                                                            "completed"
+                                                        ],
+                                                        "example": "received"
+                                                    },
+                                                    "timestamp": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/api/kitchen/orders/{orderId}/status": {
+            "post": {
+                "tags": [
+                    "KitchenDisplay"
+                ],
+                "summary": "Update order status",
+                "description": "Updates the status of an order and sends a message to Kafka",
+                "operationId": "updateOrderStatus",
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "description": "ID of the order to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "received",
+                                            "processing",
+                                            "ready",
+                                            "completed"
+                                        ],
+                                        "example": "processing"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order ORD-ABCD1234 status updated to processing"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to update order status: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/kitchen/events": {
+            "get": {
+                "tags": [
+                    "KitchenDisplay"
+                ],
+                "summary": "Stream kitchen events",
+                "description": "Server-sent events stream for real-time kitchen updates",
+                "operationId": "streamEvents",
+                "responses": {
+                    "200": {
+                        "description": "SSE stream started"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/tables/{tableId}/order": {
+            "post": {
+                "tags": [
+                    "TableOrders"
+                ],
+                "summary": "Place a new order from a table",
+                "description": "Processes a new order from a table and sends it to the kitchen via Kafka",
+                "operationId": "placeOrder",
+                "parameters": [
+                    {
+                        "name": "tableId",
+                        "in": "path",
+                        "description": "ID of the table placing the order",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "items"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "quantity",
+                                                "price"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Pizza Margherita"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 10.99
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order placed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order placed successfully"
+                                        },
+                                        "order_id": {
+                                            "type": "string",
+                                            "example": "ORD-ABCD1234"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to place order: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Kafka",
+            "description": "API endpoints for Kafka integration"
+        },
+        {
+            "name": "KitchenDisplay",
+            "description": "Kitchen display system for table orders"
+        },
+        {
+            "name": "TableOrders",
+            "description": "API endpoints for the table ordering system"
+        }
+    ]
+}

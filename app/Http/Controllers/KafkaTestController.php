@@ -99,4 +99,18 @@ class KafkaTestController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Show the Kafka test interface
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function index()
+    {
+        $kafkaUiUrl = env('KAFKA_UI_URL', 'http://localhost:8082');
+
+        return view('kafka-test', [
+            'kafkaUiUrl' => $kafkaUiUrl
+        ]);
+    }
 }

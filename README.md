@@ -70,7 +70,7 @@ This project demonstrates the integration of Apache Kafka with Laravel using the
 2. Clone the repository
 3. Run `docker-compose up -d` to start the containers
 4. Access the Laravel application at http://localhost:9999
-5. Access the Kafka UI at http://localhost:8080
+5. Access the Kafka UI at http://localhost:8082
 
 ## Kafka Integration Features
 
@@ -81,6 +81,34 @@ The project includes a complete Kafka integration with:
 - Artisan command for consuming messages via CLI
 - HTTP endpoints for producing messages via API
 - Test controller for simple message testing
+- Table ordering system with QR codes for restaurants
+- API documentation with Swagger/OpenAPI
+
+### Table Ordering System
+
+The project includes a complete QR code-based table ordering system for restaurants:
+
+- Table management system with QR code generation
+- Mobile-friendly digital menu for customers to order from their devices
+- Real-time kitchen display system showing orders as they come in
+- Order status tracking from received to completed
+- Kafka integration for real-time messaging between components
+
+#### How It Works
+
+1. Restaurant staff can access the table management system at `/tables`
+2. Each table has a unique QR code that customers can scan
+3. Customers scan the QR code to access the digital menu on their own devices
+4. Orders are placed directly through the customer's device
+5. Orders are published to Kafka and displayed on the kitchen display in real-time
+6. Kitchen staff can update order status (received → processing → ready → completed)
+7. Waitstaff are notified when orders are ready to be served
+
+#### Accessing the System
+
+- Table Management: http://localhost:9999/tables
+- Kitchen Display: http://localhost:9999/tables/kitchen
+- Customer Menu: http://localhost:9999/tables/{table_id}/menu (accessed via QR code)
 
 ### Kafka Configuration
 
@@ -90,6 +118,7 @@ The Kafka configuration is set in your `.env` file:
 KAFKA_BROKER=kafka:29092
 KAFKA_TOPIC=laravel-topic
 KAFKA_GROUP_ID=laravel-consumer-group
+KAFKA_UI_URL=http://localhost:8082
 ```
 
 ### Producing Messages
@@ -187,3 +216,24 @@ The project includes a web-based Kafka UI accessible at http://localhost:8080. T
 - Browse messages in topics
 - View consumer groups and their offsets
 - Monitor Kafka brokers
+
+### API Documentation
+
+The project includes full API documentation using Swagger/OpenAPI. You can access the interactive documentation at:
+
+```
+http://localhost:9999/api/documentation
+```
+
+This provides:
+
+- Interactive documentation for all API endpoints
+- Request and response schema information
+- Testing interface to try out API calls directly from the browser
+- Sample request bodies and responses
+
+To regenerate the Swagger documentation after making changes to the API:
+
+```bash
+docker-compose exec app php artisan l5-swagger:generate
+```

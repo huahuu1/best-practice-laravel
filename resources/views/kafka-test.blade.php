@@ -93,7 +93,7 @@
                         <pre>docker-compose exec app php artisan kafka:consume</pre>
 
                         <p class="mt-3">To view Kafka topics and messages:</p>
-                        <a href="http://localhost:8080" target="_blank" class="btn btn-secondary">Open Kafka UI</a>
+                        <a href="{{ $kafkaUiUrl }}" target="_blank" class="btn btn-secondary">Open Kafka UI</a>
                     </div>
                 </div>
             </div>
@@ -111,12 +111,11 @@
             const responseElem = document.getElementById('response');
             responseElem.innerText = 'Sending message...';
 
-            fetch('/kafka/produce', {
+            fetch("/api.php", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
                     topic: topic,

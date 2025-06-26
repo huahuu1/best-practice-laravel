@@ -12,6 +12,7 @@ services:
       - laravel-network
     depends_on:
       - mysql
+      - postgres
       - redis
 
   nginx:
@@ -31,22 +32,36 @@ services:
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: laravel_db
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_USER: laravel_user
-      MYSQL_PASSWORD: laravel_password
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
       - laravel-network
     ports:
-      - "3306:3306"
+      - "3307:3306"
+
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-laravel}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - laravel-network
+    ports:
+      - "5432:5432"
 
   redis:
     image: redis:alpine
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6380:6379"
     networks:
       - laravel-network
     volumes:
@@ -91,7 +106,7 @@ services:
     depends_on:
       - kafka
     ports:
-      - "8080:8080"
+      - "8082:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
@@ -105,4 +120,5 @@ networks:
 
 volumes:
   mysql-data:
+  postgres-data:
   redis-data:
