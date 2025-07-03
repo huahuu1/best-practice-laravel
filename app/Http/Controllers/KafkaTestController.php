@@ -40,11 +40,13 @@ class KafkaTestController extends Controller
      */
     public function testProduce(Request $request): JsonResponse
     {
-        $topic = $request->get('topic', env('KAFKA_TOPIC', 'laravel-topic'));
+        $topic = $request->get('topic', config('kafka.topics.qr_scan_events', 'qr-scan-events'));
         $message = $request->get('message', 'Test message from Laravel at ' . date('Y-m-d H:i:s'));
         $key = $request->get('key');
 
         try {
+            // Using direct producer injection here is safe since this is an internal test endpoint
+            // In production, we'd go through the API with proper authentication
             $this->producer->send($topic, $message, $key);
 
             return response()->json([
@@ -77,8 +79,8 @@ class KafkaTestController extends Controller
      */
     public function testConsume(Request $request): JsonResponse
     {
-        $topic = $request->input('topic', 'test-topic');
-        $groupId = $request->input('group_id', 'test-group');
+        $topic = $request->input('topic', config('kafka.topics.qr_scan_events', 'qr-scan-events'));
+        $groupId = $request->input('group_id', config('kafka.consumer_group_id', 'laravel-consumer-group'));
         $timeout = $request->input('timeout', 10000); // 10 seconds timeout
 
         try {
@@ -108,9 +110,11 @@ class KafkaTestController extends Controller
     public function index()
     {
         $kafkaUiUrl = env('KAFKA_UI_URL', 'http://localhost:8082');
+        $kafkaTopics = config('kafka.topics');
 
         return view('kafka-test', [
-            'kafkaUiUrl' => $kafkaUiUrl
+            'kafkaUiUrl' => $kafkaUiUrl,
+            'kafkaTopics' => $kafkaTopics
         ]);
     }
 }

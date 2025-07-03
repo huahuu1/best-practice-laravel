@@ -138,6 +138,7 @@
                 <div>
                     <button id="refreshBtn" class="btn btn-light me-2">Refresh</button>
                     <a href="{{ route('tables.index') }}" class="btn btn-outline-light">Tables</a>
+                    <a href="{{ route('react.kitchen.display') }}" class="btn btn-primary ms-2">Switch to React UI</a>
                 </div>
             </div>
         </div>

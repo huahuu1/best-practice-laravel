@@ -23,6 +23,8 @@ class KafkaController extends Controller
     public function __construct(KafkaProducer $kafkaProducer)
     {
         $this->kafkaProducer = $kafkaProducer;
+
+        // Apply web middleware but exclude the produce method
         $this->middleware('web')->except(['produce']);
     }
 
@@ -30,9 +32,9 @@ class KafkaController extends Controller
      * Produce a message to Kafka
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function produce(Request $request)
+    public function produce(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'topic' => 'required|string',
@@ -53,6 +55,11 @@ class KafkaController extends Controller
                 'details' => $result
             ]);
         } catch (\Exception $e) {
+            Log::error('Kafka produce error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to send message',

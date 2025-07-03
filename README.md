@@ -83,6 +83,7 @@ The project includes a complete Kafka integration with:
 - Test controller for simple message testing
 - Table ordering system with QR codes for restaurants
 - API documentation with Swagger/OpenAPI
+- Real-time chat functionality between customers and staff
 
 ### Table Ordering System
 
@@ -93,6 +94,7 @@ The project includes a complete QR code-based table ordering system for restaura
 - Real-time kitchen display system showing orders as they come in
 - Order status tracking from received to completed
 - Kafka integration for real-time messaging between components
+- Real-time chat functionality for customer support
 
 #### How It Works
 
@@ -103,12 +105,36 @@ The project includes a complete QR code-based table ordering system for restaura
 5. Orders are published to Kafka and displayed on the kitchen display in real-time
 6. Kitchen staff can update order status (received → processing → ready → completed)
 7. Waitstaff are notified when orders are ready to be served
+8. Customers can chat with staff for assistance or special requests
 
 #### Accessing the System
 
 - Table Management: http://localhost:9999/tables
 - Kitchen Display: http://localhost:9999/tables/kitchen
 - Customer Menu: http://localhost:9999/tables/{table_id}/menu (accessed via QR code)
+
+### Chat Functionality
+
+The system includes real-time chat functionality powered by NestJS and WebSockets:
+
+- Customers can chat with staff directly from the menu page
+- Staff can respond to customer inquiries in real-time
+- Chat messages are organized by table
+- Integration with Kafka for message persistence and service communication
+
+#### Chat Architecture
+
+- NestJS microservice for handling WebSocket connections
+- Socket.io for real-time communication
+- Kafka integration for message persistence and cross-service communication
+- Room-based chat organization by table
+
+#### Setting Up the Chat Service
+
+1. Navigate to the restaurant-chat-service directory
+2. Install dependencies with `npm install`
+3. Start the service with `./start-chat-service.sh` or `npm run start:dev`
+4. The chat service will be available at http://localhost:3001
 
 ### Kafka Configuration
 

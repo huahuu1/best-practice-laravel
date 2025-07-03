@@ -4,14 +4,29 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "npm run update-all-ips && vite",
+        "update-ip": "./update-base-url.sh",
+        "dev:auto-ip": "./start-dev-auto-ip.sh",
+        "sync-chat-env": "cp ../restaurant-chat-service/public/env.js public/ || echo 'Chat service env.js not found'",
+        "update-all-ips": "./update-all-ips.sh",
+        "start-all": "./start-all-services.sh"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
+        "@vitejs/plugin-react": "^4.2.1",
         "axios": "^1.8.2",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.2.0",
         "tailwindcss": "^4.0.0",
         "vite": "^6.2.4"
+    },
+    "dependencies": {
+        "@ant-design/icons": "^6.0.0",
+        "antd": "^5.26.2",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-qr-code": "^2.0.12",
+        "react-router-dom": "^6.22.0",
+        "socket.io-client": "^4.8.1"
     }
 }

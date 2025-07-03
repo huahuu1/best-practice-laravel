@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kafka Test</title>
+
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -54,12 +58,17 @@
                         <form id="produceForm">
                             <div class="mb-3">
                                 <label for="topic" class="form-label">Topic</label>
-                                <input type="text" class="form-control" id="topic" value="test-topic" required>
+                                <select class="form-select" id="topic" required>
+                                    @foreach($kafkaTopics as $key => $topic)
+                                        <option value="{{ $topic }}">{{ $key }} ({{ $topic }})</option>
+                                    @endforeach
+                                    <option value="test-topic">Custom: test-topic</option>
+                                </select>
                             </div>
 
                             <div class="mb-3">
                                 <label for="message" class="form-label">Message</label>
-                                <textarea class="form-control" id="message" rows="3" required>Hello Kafka from Laravel!</textarea>
+                                <textarea class="form-control" id="message" rows="3" required>Hello Kafka from Laravel at {{ date('Y-m-d H:i:s') }}!</textarea>
                             </div>
 
                             <div class="mb-3">
@@ -107,15 +116,18 @@
             const topic = document.getElementById('topic').value;
             const message = document.getElementById('message').value;
             const key = document.getElementById('key').value;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             const responseElem = document.getElementById('response');
             responseElem.innerText = 'Sending message...';
 
-            fetch("/api.php", {
+            fetch("/api/kafka/produce", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     topic: topic,

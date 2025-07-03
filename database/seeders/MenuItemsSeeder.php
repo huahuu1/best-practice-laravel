@@ -21,6 +21,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 10.99,
                 'category' => 'Main',
                 'available' => true,
+                'image_path' => 'images/menu/pizza-margherita.jpg',
             ],
             [
                 'name' => 'Burger',
@@ -28,6 +29,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 12.99,
                 'category' => 'Main',
                 'available' => true,
+                'image_path' => 'images/menu/burger.jpg',
             ],
             [
                 'name' => 'Pasta Carbonara',
@@ -35,6 +37,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 11.99,
                 'category' => 'Main',
                 'available' => true,
+                'image_path' => 'images/menu/pasta-carbonara.jpg',
             ],
 
             // Starters
@@ -44,6 +47,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 8.99,
                 'category' => 'Starter',
                 'available' => true,
+                'image_path' => 'images/menu/caesar-salad.jpg',
             ],
             [
                 'name' => 'Garlic Bread',
@@ -51,6 +55,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 4.99,
                 'category' => 'Starter',
                 'available' => true,
+                'image_path' => 'images/menu/garlic-bread.jpg',
             ],
             [
                 'name' => 'Soup of the Day',
@@ -58,6 +63,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 5.99,
                 'category' => 'Starter',
                 'available' => true,
+                'image_path' => 'images/menu/soup.jpg',
             ],
 
             // Desserts
@@ -67,6 +73,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 6.99,
                 'category' => 'Dessert',
                 'available' => true,
+                'image_path' => 'images/menu/tiramisu.jpg',
             ],
             [
                 'name' => 'Cheesecake',
@@ -74,6 +81,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 7.99,
                 'category' => 'Dessert',
                 'available' => true,
+                'image_path' => 'images/menu/cheesecake.jpg',
             ],
 
             // Drinks
@@ -83,6 +91,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 2.99,
                 'category' => 'Drinks',
                 'available' => true,
+                'image_path' => 'images/menu/soft-drink.jpg',
             ],
             [
                 'name' => 'Coffee',
@@ -90,6 +99,7 @@ class MenuItemsSeeder extends Seeder
                 'price' => 3.99,
                 'category' => 'Drinks',
                 'available' => true,
+                'image_path' => 'images/menu/coffee.jpg',
             ],
         ];
 

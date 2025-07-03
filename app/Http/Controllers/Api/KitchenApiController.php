@@ -83,30 +83,37 @@ class KitchenApiController extends Controller
     public function getOrders(): JsonResponse
     {
         try {
-            // Fetch active orders from the database
+            // Fetch active orders and recently completed orders (last 24 hours)
             // Using single quotes for PostgreSQL enum values
             $orders = Order::whereIn('status', ['received', 'processing', 'ready'])
+                ->orWhere(function ($query) {
+                    $query->where('status', 'completed')
+                          ->where('updated_at', '>=', now()->subHours(24));
+                })
                 ->with(['items.menuItem'])
                 ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($order) {
-                $items = $order->items->map(function ($item) {
+                ->get()
+                ->map(function ($order) {
+                    $items = $order->items->map(function ($item) {
+                        return [
+                            'id' => $item->menu_item_id,
+                            'name' => $item->menuItem->name,
+                            'quantity' => $item->quantity,
+                            'price' => $item->price,
+                            'special_instructions' => $item->special_instructions
+                        ];
+                    });
+
                     return [
-                        'id' => $item->menu_item_id,
-                        'name' => $item->menuItem->name,
-                        'quantity' => $item->quantity,
-                        'price' => $item->price
+                        'order_id' => $order->order_id,
+                        'table_id' => $order->table_id,
+                        'items' => $items,
+                        'status' => $order->status,
+                        'timestamp' => $order->created_at->toIso8601String(),
+                        'updated_at' => $order->updated_at->toIso8601String(),
+                        'total' => $order->total
                     ];
                 });
-
-                return [
-                    'order_id' => $order->order_id,
-                    'table_id' => $order->table_id,
-                    'items' => $items,
-                    'status' => $order->status,
-                    'timestamp' => $order->created_at->toIso8601String()
-                ];
-            });
 
             return response()->json([
                 'success' => true,
@@ -257,7 +264,7 @@ class KitchenApiController extends Controller
             header('X-Accel-Buffering: no');
 
             // In a real app, this would connect to Kafka and stream messages
-            // For this demo, we'll simulate events every few seconds
+            // For this demo, we'll keep the connection open without generating fake orders
 
             $counter = 0;
             while (true) {
@@ -266,7 +273,8 @@ class KitchenApiController extends Controller
                     break;
                 }
 
-                // Simulate receiving a message from Kafka
+                // Comment out the fake order generation
+                /*
                 if ($counter % 5 === 0) {
                     // Every 10 seconds, send a fake order update
                     $orderId = 'ORD-' . strtoupper(substr(md5(rand()), 0, 8));
@@ -291,6 +299,7 @@ class KitchenApiController extends Controller
                     echo "data: " . json_encode($event) . "\n\n";
                     flush();
                 }
+                */
 
                 $counter++;
                 sleep(2); // Sleep for 2 seconds
@@ -298,5 +307,102 @@ class KitchenApiController extends Controller
         });
 
         return $response;
+    }
+
+    /**
+     * Get kitchen order statistics
+     *
+     * @OA\Get(
+     *     path="/api/kitchen/statistics",
+     *     operationId="getKitchenStatistics",
+     *     tags={"KitchenDisplay"},
+     *     summary="Get kitchen order statistics",
+     *     description="Returns statistics for kitchen orders like counts by status and average preparation times",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="statistics",
+     *                 type="object",
+     *                 @OA\Property(property="received_count", type="integer", example=5),
+     *                 @OA\Property(property="processing_count", type="integer", example=3),
+     *                 @OA\Property(property="ready_count", type="integer", example=2),
+     *                 @OA\Property(property="completed_count", type="integer", example=10),
+     *                 @OA\Property(property="avg_preparation_time", type="integer", example=15)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * @return JsonResponse
+     */
+    public function getKitchenStatistics(): JsonResponse
+    {
+        try {
+            $today = now()->startOfDay();
+
+            // Count orders by status for today
+            $receivedCount = Order::where('status', 'received')
+                ->where('created_at', '>=', $today)
+                ->count();
+
+            $processingCount = Order::where('status', 'processing')
+                ->where('created_at', '>=', $today)
+                ->count();
+
+            $readyCount = Order::where('status', 'ready')
+                ->where('created_at', '>=', $today)
+                ->count();
+
+            $completedCount = Order::where('status', 'completed')
+                ->where('created_at', '>=', $today)
+                ->count();
+
+            // Calculate average preparation time for completed orders today
+            // (time between 'received' and 'ready' statuses)
+            $completedOrders = Order::where('status', 'completed')
+                ->where('created_at', '>=', $today)
+                ->get();
+
+            $totalPreparationTime = 0;
+            $ordersWithPrepTime = 0;
+
+            foreach ($completedOrders as $order) {
+                // For this demo, we'll just use a simple calculation based on created_at and updated_at
+                // In a real system, you'd track timestamp of each status change
+                $preparationTime = $order->updated_at->diffInMinutes($order->created_at);
+                $totalPreparationTime += $preparationTime;
+                $ordersWithPrepTime++;
+            }
+
+            $avgPreparationTime = $ordersWithPrepTime > 0
+                ? round($totalPreparationTime / $ordersWithPrepTime)
+                : 0;
+
+            return response()->json([
+                'success' => true,
+                'statistics' => [
+                    'received_count' => $receivedCount,
+                    'processing_count' => $processingCount,
+                    'ready_count' => $readyCount,
+                    'completed_count' => $completedCount,
+                    'avg_preparation_time' => $avgPreparationTime,
+                    'total_orders_today' => $receivedCount + $processingCount + $readyCount + $completedCount
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch kitchen statistics', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch kitchen statistics: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
